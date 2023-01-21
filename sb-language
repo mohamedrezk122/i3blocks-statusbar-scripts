@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+current_layout=$(setxkbmap -query  | grep layout | awk '{print $2}')
+
+if [ $current_layout == "ar" ]; then
+	setxkbmap us 
+else
+	setxkbmap ar
+fi
+
+
+
+
+
+
+
+

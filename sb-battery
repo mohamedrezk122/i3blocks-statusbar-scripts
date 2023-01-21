@@ -1,0 +1,31 @@
+#!/bin/python3 
+
+import os 
+import subprocess 
+
+path = "/sys/class/power_supply/BAT0"
+
+status = open(f"{path}/status").readline().replace("\n","")
+capacity = int(open(f"{path}/capacity").readline().replace("\n",""))
+
+status_icons = {"Discharging"  : "🔋"  ,
+                "Charging"     : "🔌"  ,
+                "Full"         : "⚡"  ,
+                "Not charging" : "🔋"  ,
+                "Unknown"      : "❔"  }
+
+def warn():
+    prompt = "🪫Battery is low , connect the charger "
+    subprocess.call(["notify-send", prompt], \
+    stdout=open(os.devnull, "w"), stderr=subprocess.STDOUT)
+
+
+icon = status_icons[status]
+
+if status == "Discharging" and capacity <= 25 : 
+    warn()
+    icon = "🪫"
+
+print(f"{icon}{capacity}%")
+
+

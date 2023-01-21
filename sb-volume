@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+if [ $1 == "query" ]; then
+	volume=$(pamixer --get-volume-human)
+	echo "vol: $volume"
+else
+	paplay /usr/share/sounds/Yaru/stereo/audio-volume-change.oga
+	if [ $1 == "inc" ];then
+		pactl set-sink-volume @DEFAULT_SINK@ +5% 
+	 
+	elif [ $1 == "dec" ];then   
+		pactl set-sink-volume @DEFAULT_SINK@ -5% 
+	   
+	elif [ $1 == "mute" ];then  
+		pactl set-sink-mute @DEFAULT_SINK@ toggle   
+
+	fi 
+fi 

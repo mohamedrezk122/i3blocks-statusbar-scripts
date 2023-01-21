@@ -1,0 +1,12 @@
+#!/bin/python3
+
+import subprocess 
+
+command = "nvidia-smi --format=csv --query-gpu=utilization.memory,temperature.gpu | awk \"NR==2\" "
+
+status = subprocess.getoutput(command)
+
+mem, temp = status.split(",")
+mem = mem.replace(" ", "")
+
+print(f"gpu: {mem}{temp}°C") 

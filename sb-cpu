@@ -1,0 +1,12 @@
+#!/bin/python3
+
+import subprocess
+command_temp = "sensors | grep temp1 | cut -d \":\" -f 2"
+command_usage=" top -bn1 | grep \"Cpu(s)\" "
+
+# usage = 100 - float(subprocess.getoutput(command_usage).split(":")[1].split(",")[3].replace("id",""))
+
+temp  = int(float(subprocess.getoutput(command_temp).replace("°C","")))
+
+# print(usage)
+print(f"cpu: {temp}°C")

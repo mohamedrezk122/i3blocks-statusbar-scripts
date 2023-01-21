@@ -1,0 +1,14 @@
+#!/bin/python3
+
+import subprocess
+
+command = "uptime  | awk '{print $3 }' | cut -d \",\" -f  1"
+time_out = subprocess.getoutput(command)
+
+if ":" in time_out :
+	# mins and hours 
+	hours, mins = time_out.split(":")
+	print(f"up: {hours}h {mins}m")
+else:
+	# mins only
+	print(f"up: 0h {time_out}m")

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+default_source=$(pactl get-default-source)
+mute_status=$(pactl get-source-mute $default_source | grep "Mute" | awk '{print $2}')
+
+if [ $mute_status == "yes" ]; then
+        echo "mic: muted"
+else
+        echo "mic: on"
+fi
