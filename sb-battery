@@ -23,7 +23,7 @@ def warn():
 icon = status_icons[status]
 
 if status == "Discharging" and capacity <= 25 : 
-    warn()
+    # warn()
     icon = "🪫"
 
 print(f"{icon}{capacity}%")
