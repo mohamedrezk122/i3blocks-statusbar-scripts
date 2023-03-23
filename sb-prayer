@@ -2,7 +2,7 @@
 
 import subprocess 
 import os 
-from datetime import datetime
+from datetime import datetime , timedelta
 from zoneinfo import ZoneInfo
 from adhanpy.calculation import CalculationParameters
 from adhanpy.PrayerTimes import PrayerTimes
@@ -21,22 +21,33 @@ prayer_times      = PrayerTimes(
                             )
 
 # this will display the time in the chosen time zone
-fajr    =  prayer_times.fajr.strftime('%H:%M')
-dhuhr   =  prayer_times.dhuhr.strftime('%H:%M')
-asr     =  prayer_times.asr.strftime('%H:%M')
-maghrib =  prayer_times.maghrib.strftime('%H:%M')
-isha    =  prayer_times.isha.strftime('%H:%M')
-button  = os.getenv("BLOCK_BUTTON", "Nope")
 
+button       = os.getenv("BLOCK_BUTTON", "Nope")
+prayers      = {'fajr':None , 'dhuhr':None , 'asr':None , 'maghrib':None , 'isha':None }
+next_prayer  = float('inf')
+next_prayer_name =""
+for prayer in prayers :
+    time = eval(f"prayer_times.{prayer}.strftime('%H:%M')")
+    hours = time[:2]
+    minutes = time[3:]
+    left = timedelta(hours = int(hours) , minutes = int(minutes)) - timedelta(hours=today.hour , minutes=today.minute)
+    prayers[prayer] = time
+    left = left.total_seconds()
+    if left >= 0 :
+        if left < next_prayer :
+            next_prayer_name = prayer
+            next_prayer = left
+
+print("🕌",next_prayer_name.capitalize() , str(timedelta(seconds=next_prayer))[:-3])
 
 times = f"""
 <span size="10pt"> <b>Salah     Time       Sunah</b> </span> 
 --------------------------------------
-<span size="11pt"><b>Fajr</b>     {fajr}     -2,_ 
-<b>Dhuhr</b>    {dhuhr}     -4,+2  
-<b>Asr</b>      {asr}     _,_
-<b>Maghrib</b>  {maghrib}     _,+2
-<b>Isha</b>     {isha}     _,+2
+<span size="11pt"><b>Fajr</b>     {prayers["fajr"]}     -2,_ 
+<b>Dhuhr</b>    {prayers["dhuhr"]}     -4,+2  
+<b>Asr</b>      {prayers["asr"]}     _,_
+<b>Maghrib</b>  {prayers["maghrib"]}     _,+2
+<b>Isha</b>     {prayers["isha"]}     _,+2
 </span> 
 """
 
