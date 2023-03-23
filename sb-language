@@ -1,12 +1,12 @@
 #!/bin/bash
 
 
-current_layout=$(setxkbmap -query  | grep layout | awk '{print $2}')
+current_layout=$(setxkbmap -query  | grep layout | awk '{print $2}'| cut -d "," -f 1)
 
 if [ $current_layout == "ar" ]; then
-	setxkbmap us 
+	setxkbmap -layout us,ar 
 else
-	setxkbmap ar
+	setxkbmap -layout ar,us 
 fi
 
 

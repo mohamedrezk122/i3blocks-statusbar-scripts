@@ -2,8 +2,16 @@
 
 
 if [ $1 == "query" ]; then
-	volume=$(pamixer --get-volume-human)
-	echo "vol: $volume"
+	volume=$(pamixer --get-volume-human | cut -d "%" -f 1 )
+ 
+		[ $volume -gt 0   ] && [ $volume -le 20  ] && bar="-     "
+		[ $volume -gt 20  ] && [ $volume -le 40  ] && bar="--    "
+		[ $volume -gt 40  ] && [ $volume -le 60  ] && bar="---   "
+		[ $volume -gt 60  ] && [ $volume -le 80  ] && bar="----  "
+		[ $volume -gt 80  ] && [ $volume -le 100 ] && bar="----- "
+		[ $volume -gt 100 ]                        && bar="------"
+	
+	echo "vol: $volume%"
 else
 	paplay /usr/share/sounds/Yaru/stereo/audio-volume-change.oga
 	if [ $1 == "inc" ];then

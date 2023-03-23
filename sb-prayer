@@ -1,3 +1,61 @@
-#!/bin/bash
+#!/bin/python3 
 
-python3 ~/.scripts/statusbar/prayer/main.py
+import subprocess 
+import os 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from adhanpy.calculation import CalculationParameters
+from adhanpy.PrayerTimes import PrayerTimes
+
+# set parameters according to Egyptian General Authority of Survey 
+parameters        = CalculationParameters(fajr_angle=19.5, isha_angle=17.5)
+cairo_zone        = ZoneInfo("Africa/Cairo")
+cairo_coordinates = (30.0444 , 31.2357)
+home_coordinates  = (30.3022 , 31.7456)
+today             = datetime.now()
+prayer_times      = PrayerTimes(
+                            home_coordinates,
+                            today,
+                            calculation_parameters=parameters,
+                            time_zone=cairo_zone,
+                            )
+
+# this will display the time in the chosen time zone
+fajr    =  prayer_times.fajr.strftime('%H:%M')
+dhuhr   =  prayer_times.dhuhr.strftime('%H:%M')
+asr     =  prayer_times.asr.strftime('%H:%M')
+maghrib =  prayer_times.maghrib.strftime('%H:%M')
+isha    =  prayer_times.isha.strftime('%H:%M')
+button  = os.getenv("BLOCK_BUTTON", "Nope")
+
+
+times = f"""
+<span size="10pt"> <b>Salah     Time       Sunah</b> </span> 
+--------------------------------------
+<span size="11pt"><b>Fajr</b>     {fajr}     -2,_ 
+<b>Dhuhr</b>    {dhuhr}     -4,+2  
+<b>Asr</b>      {asr}     _,_
+<b>Maghrib</b>  {maghrib}     _,+2
+<b>Isha</b>     {isha}     _,+2
+</span> 
+"""
+
+title = f'\t<span size="11pt" foreground="#FB617F"><b>🕌 Prayer Times</b>\t\t</span>'
+body  = f"{title}\n{times}"
+name  = "prayer.times" 
+
+def send_notification(name , title , body):
+    
+    import gi
+    gi.require_version('Gio', '2.0')
+    from gi.repository import Gio
+
+    Application = Gio.Application.new(name, Gio.ApplicationFlags.FLAGS_NONE)
+    Application.register()
+    Notification = Gio.Notification.new(title)
+    Notification.set_body(body)
+    Application.send_notification(None, Notification)
+
+
+if button :
+    send_notification(name , '' , body)
