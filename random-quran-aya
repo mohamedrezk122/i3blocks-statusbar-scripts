@@ -27,6 +27,6 @@ def send_notification(name , title , body):
     Notification.set_body(body)
     Application.send_notification(None, Notification)
 
-if button  :
+if button == "1"  :
     send_notification('random.aya', '' , body)
 

@@ -68,5 +68,5 @@ def send_notification(name , title , body):
     Application.send_notification(None, Notification)
 
 
-if button :
+if button == "1" :
     send_notification(name , '' , body)
