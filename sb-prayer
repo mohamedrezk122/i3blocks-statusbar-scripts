@@ -26,17 +26,23 @@ button       = os.getenv("BLOCK_BUTTON", "Nope")
 prayers      = {'fajr':None , 'dhuhr':None , 'asr':None , 'maghrib':None , 'isha':None }
 next_prayer  = float('inf')
 next_prayer_name =""
+today_delta =  timedelta(hours=today.hour , minutes=today.minute)
 for prayer in prayers :
     time = eval(f"prayer_times.{prayer}.strftime('%H:%M')")
     hours = time[:2]
     minutes = time[3:]
-    left = timedelta(hours = int(hours) , minutes = int(minutes)) - timedelta(hours=today.hour , minutes=today.minute)
+    left = timedelta(hours = int(hours) , minutes = int(minutes)) - today_delta
     prayers[prayer] = time
     left = left.total_seconds()
     if left >= 0 :
         if left < next_prayer :
             next_prayer_name = prayer
             next_prayer = left
+
+if next_prayer == float('inf') : 
+	next_prayer =  timedelta(hours = int(prayer_times.fajr.strftime('%H:%M')[:2]) , minutes = int(prayer_times.fajr.strftime('%H:%M')[3:])) - today_delta
+	next_prayer = 24 * 3600 + (next_prayer.total_seconds()) 
+	next_prayer_name = "fajr"
 
 print("🕌",next_prayer_name.capitalize() , str(timedelta(seconds=next_prayer))[:-3])
 
