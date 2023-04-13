@@ -32,7 +32,7 @@ for prayer in prayers :
     hours = time[:2]
     minutes = time[3:]
     left = timedelta(hours = int(hours) , minutes = int(minutes)) - today_delta
-    prayers[prayer] = time
+    prayers[prayer] = f"{str(int(hours)%12)}:{minutes}"
     left = left.total_seconds()
     if left >= 0 :
         if left < next_prayer :
