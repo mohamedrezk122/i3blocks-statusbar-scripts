@@ -1,27 +1,37 @@
 #!/bin/bash
 
+# soundeffect file path
+soundfile="/usr/share/sounds/Yaru/stereo/audio-volume-change.oga"
 
-if [ $1 == "query" ]; then
-	volume=$(pamixer --get-volume-human | cut -d "%" -f 1 )
- 
-		[ $volume -gt 0   ] && [ $volume -le 20  ] && bar="-     "
-		[ $volume -gt 20  ] && [ $volume -le 40  ] && bar="--    "
-		[ $volume -gt 40  ] && [ $volume -le 60  ] && bar="---   "
-		[ $volume -gt 60  ] && [ $volume -le 80  ] && bar="----  "
-		[ $volume -gt 80  ] && [ $volume -le 100 ] && bar="----- "
-		[ $volume -gt 100 ]                        && bar="------"
-	
-	echo "vol: $volume%"
-else
-	paplay /usr/share/sounds/Yaru/stereo/audio-volume-change.oga
-	if [ $1 == "inc" ];then
-		pactl set-sink-volume @DEFAULT_SINK@ +5% 
-	 
-	elif [ $1 == "dec" ];then   
-		pactl set-sink-volume @DEFAULT_SINK@ -5% 
-	   
-	elif [ $1 == "mute" ];then  
-		pactl set-sink-mute @DEFAULT_SINK@ toggle   
+playsound() {
+    if [[ -f "$soundfile" ]]; then
+        paplay "$soundfile"
+    fi
+}
 
-	fi 
-fi 
+format_volume() {
+    local vol="$1"
+    local is_muted=$(pactl get-sink-mute @DEFAULT_SINK@)
+    if [[ "$is_muted" == *"yes"* ]]; then
+        vol="muted"
+    else
+        vol=$(echo "$vol" | grep -Po '\d+(?=%)' | head -n 1)
+    fi
+    echo "vol: $vol"
+}
+
+case "$1" in
+    inc)
+        playsound
+        pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
+    dec)
+        playsound
+        pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
+    query)
+        volume=$(pactl get-sink-volume @DEFAULT_SINK@)
+        format_volume "$volume" ;;
+    mute)
+        pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+    *)
+        echo "Usage: ./sb-volume [inc|dec|mute|query]" ;;
+esac
