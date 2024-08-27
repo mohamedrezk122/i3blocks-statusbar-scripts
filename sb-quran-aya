@@ -1,0 +1,38 @@
+#!/bin/python3.11
+
+import subprocess
+import pyquran as pq
+import random
+import os
+
+
+def convert_numbers(number):
+    english_to_hindi = {
+        '0': '٠',
+        '1': '١',
+        '2': '٢',
+        '3': '٣',
+        '4': '٤',
+        '5': '٥',
+        '6': '٦',
+        '7': '٧',
+        '8': '٨',
+        '9': '٩',
+    }
+    number = list(str(number))
+    return "".join([english_to_hindi[n] for n in number])
+
+
+button = os.getenv("BLOCK_BUTTON", None)
+sura = random.randint(1, 114)
+sura_name = pq.quran.get_sura_name(sura)
+
+aya = random.choice(pq.quran.get_sura(sura, with_tashkeel=True))
+sura = convert_numbers(sura)
+title = f'\t<span font_family="serif" size="17pt" foreground="#FB617F">{sura_name}</span>'
+aya_num = f'<span font_family="serif" size="15pt">({sura})</span>'
+aya_formatted = f'<span font_family="serif" size="15pt">{aya}</span>'
+body = f"{title} {aya_num}\n{aya_formatted}"
+
+if button == "1":
+    subprocess.run(["notify-send", " ", body])
