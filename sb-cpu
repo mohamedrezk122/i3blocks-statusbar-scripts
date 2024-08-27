@@ -1,12 +1,29 @@
-#!/bin/python3
+#!/bin/bash
 
-import subprocess
-command_temp = "sensors | grep temp1 | cut -d \":\" -f 2"
-command_usage=" top -bn1 | grep \"Cpu(s)\" "
+sleep_duration_secs=0.3
 
-# usage = 100 - float(subprocess.getoutput(command_usage).split(":")[1].split(",")[3].replace("id",""))
+compute_cpu_utilization() {
+    local stats_raw=$(grep -P 'cpu ' "/proc/stat")
+    local stats=($stats_raw) # array created from splitting the string on whitespaces
+    # echo "$stats_raw"
+    local user=${stats[1]};    local nice=${stats[2]};   local system=${stats[3]}
+    local idle=${stats[4]};    local iowait=${stats[5]}; local irq=${stats[6]}
+    local softirq=${stats[7]}; local steal=${stats[8]}
+    # echo "$user $nice $system $idle $iowait $irq $softirq $steal"
+    local idle_total=$((idle + iowait))
+    local non_idle=$((user + nice + system + irq + softirq + steal))
+    local total=$((idle_total + non_idle))
 
-temp  = int(float(subprocess.getoutput(command_temp).replace("°C","")))
+    echo "$total" "$idle_total"
+}
 
-# print(usage)
-print(f"cpu: {temp}°C")
+read ctotal cidle  <<< $(compute_cpu_utilization)
+sleep "$sleep_duration_secs"
+read ptotal pidle <<< $(compute_cpu_utilization)
+
+totald=$((ctotal - ptotal))
+idled=$((cidle - pidle))
+
+cpu=$(awk "BEGIN {print int(0.5 + 100*100*($totald - $idled)/$totald)/100}")
+temp=$(sensors | grep temp1 | cut -d ":" -f 2 | cut -d "+" -f 2 | cut -d "." -f 1)
+echo "cpu: ${cpu}% ${temp}°C"
