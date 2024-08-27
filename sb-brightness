@@ -1,7 +1,0 @@
-#!/bin/bash
-
-percent=$(xbacklight -get  | cut -d. -f1)
-echo  "🔆 $percent%" 
-
-
-

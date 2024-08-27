@@ -1,5 +1,0 @@
-#!/bin/bash
-
-song=$(rhythmbox-client --print-playing)
-
-echo "$song"
