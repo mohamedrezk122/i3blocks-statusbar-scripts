@@ -1,31 +1,26 @@
-#!/bin/python3 
+#!/bin/bash
 
-import os 
-import subprocess 
+visual_icons=false
+batdir="/sys/class/power_supply/BAT0"
 
-path = "/sys/class/power_supply/BAT0"
+status=$(cat "$batdir/status")
+capacity=$(cat "$batdir/capacity")
 
-status = open(f"{path}/status").readline().replace("\n","")
-capacity = int(open(f"{path}/capacity").readline().replace("\n",""))
+warn() {
+    local prompt="🪫Battery is low, connect the charger"
+    notify-send "$prompt"
+}
 
-status_icons = {"Discharging"  : "🔋"  ,
-                "Charging"     : "🔌"  ,
-                "Full"         : "⚡"  ,
-                "Not charging" : "🔋"  ,
-                "Unknown"      : "❔"  }
+case "$status" in
+    Discharging)
+        [[ "$visual_icons" = true ]] && icon="🔋" || icon=""
+        [[ "$capacity" -le 25 ]] && icon="🪫" ;; # warn
+    Charging)
+        [[ "$visual_icons" = true ]] && icon="🔌" || icon="c " ;;
+    Full)
+        [[ "$visual_icons" = true ]] && icon="⚡" || icon="f " ;;
+    Unknown | "Not charging" | *)
+        icon="" ;;
+esac
 
-def warn():
-    prompt = "🪫Battery is low , connect the charger "
-    subprocess.call(["notify-send", prompt], \
-    stdout=open(os.devnull, "w"), stderr=subprocess.STDOUT)
-
-
-icon = status_icons[status]
-
-if status == "Discharging" and capacity <= 25 : 
-    # warn()
-    icon = "🪫"
-
-print(f"{icon}{capacity}%")
-
-
+echo "${icon}${capacity}%"
