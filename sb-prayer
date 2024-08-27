@@ -1,78 +1,65 @@
-#!/bin/python3 
+#!/bin/python3
 
-import subprocess 
-import os 
-from datetime import datetime , timedelta
+import subprocess
+import os
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from adhanpy.calculation import CalculationParameters
+
 from adhanpy.PrayerTimes import PrayerTimes
+from adhanpy.calculation import CalculationParameters
 
-# set parameters according to Egyptian General Authority of Survey 
-parameters        = CalculationParameters(fajr_angle=19.5, isha_angle=17.5)
-cairo_zone        = ZoneInfo("Africa/Cairo")
-cairo_coordinates = (30.0444 , 31.2357)
-home_coordinates  = (30.3022 , 31.7456)
-today             = datetime.now()
-prayer_times      = PrayerTimes(
-                            home_coordinates,
-                            today,
-                            calculation_parameters=parameters,
-                            time_zone=cairo_zone,
-                            )
+# set parameters according to Egyptian General Authority of Survey
+today = datetime.now()
+today_delta = timedelta(hours=today.hour, minutes=today.minute)
 
-# this will display the time in the chosen time zone
+cairo_coordinates = (30.0444, 31.2357)
+prayer_times = PrayerTimes(
+    cairo_coordinates,
+    today,
+    calculation_parameters=CalculationParameters(fajr_angle=19.5, isha_angle=17.5),
+    time_zone=ZoneInfo("Africa/Cairo"),
+)
 
-button       = os.getenv("BLOCK_BUTTON", "Nope")
-prayers      = {'fajr':None , 'dhuhr':None , 'asr':None , 'maghrib':None , 'isha':None }
-next_prayer  = float('inf')
-next_prayer_name =""
-today_delta =  timedelta(hours=today.hour , minutes=today.minute)
-for prayer in prayers :
-    time = eval(f"prayer_times.{prayer}.strftime('%H:%M')")
-    hours = time[:2]
-    minutes = time[3:]
-    left = timedelta(hours = int(hours) , minutes = int(minutes)) - today_delta
-    prayers[prayer] = f"{str(int(hours)%12)}:{minutes}"
+prayers = {"fajr": None, "dhuhr": None, "asr": None, "maghrib": None, "isha": None}
+next_prayer_time, next_prayer_name = None, None
+for prayer in prayers:
+    time = eval(f"prayer_times.{prayer}")
+    hours = int(time.strftime('%H'))
+    minutes = int(time.strftime('%M'))
+    prayers[prayer] = "%s:%s" % (hours % 12, minutes)
+    left = timedelta(hours=hours, minutes=minutes) - today_delta
     left = left.total_seconds()
-    if left >= 0 :
-        if left < next_prayer :
-            next_prayer_name = prayer
-            next_prayer = left
+    if left >= 0 and left < next_prayer_time:
+        next_prayer_name = prayer
+        next_prayer_time = left
 
-if next_prayer == float('inf') : 
-	next_prayer =  timedelta(hours = int(prayer_times.fajr.strftime('%H:%M')[:2]) , minutes = int(prayer_times.fajr.strftime('%H:%M')[3:])) - today_delta
-	next_prayer = 24 * 3600 + (next_prayer.total_seconds()) 
-	next_prayer_name = "fajr"
+if next_prayer_time is None:
+    next_prayer_time = (
+        timedelta(
+            hours=int(prayer_times.fajr.strftime("%H")),
+            minutes=int(prayer_times.fajr.strftime("%M")),
+        )
+        - today_delta
+    )
+    next_prayer_time = 24 * 3600 + (next_prayer_time.total_seconds())
+    next_prayer_name = "fajr"
 
-print("🕌",next_prayer_name.capitalize() , str(timedelta(seconds=next_prayer))[:-3])
+print(next_prayer_name.lower(), str(timedelta(seconds=next_prayer_time))[:-3])
 
-times = f"""
-<span size="10pt"> <b>Salah     Time       Sunah</b> </span> 
---------------------------------------
-<span size="11pt"><b>Fajr</b>     {prayers["fajr"]}     -2,_ 
-<b>Dhuhr</b>    {prayers["dhuhr"]}     -4,+2  
-<b>Asr</b>      {prayers["asr"]}     _,_
-<b>Maghrib</b>  {prayers["maghrib"]}     _,+2
-<b>Isha</b>     {prayers["isha"]}     _,+2
-</span> 
-"""
+button = os.getenv("BLOCK_BUTTON", None)
+if button == "1":
+    times = "".join([
+        '<span size="15pt" foreground="#FB617F">',
+        "<b>  🕌 Prayer Times</b></span>\n",
+        '<span size="14pt"><b>',
+        "Salah   \t Time</b>\n",
+        "-----------------------\n",
+        "<b>Fajr</b>     \t %s\n" % prayers["fajr"],
+        "<b>Dhuhr</b>    \t %s\n" % prayers["dhuhr"],
+        "<b>Asr</b>      \t %s\n" % prayers["asr"],
+        "<b>Maghrib</b>  \t %s\n" % prayers["maghrib"],
+        "<b>Isha</b>     \t %s\n" % prayers["isha"],
+        "</span>"
+    ])
 
-title = f'\t<span size="11pt" foreground="#FB617F"><b>🕌 Prayer Times</b>\t\t</span>'
-body  = f"{title}\n{times}"
-name  = "prayer.times" 
-
-def send_notification(name , title , body):
-    
-    import gi
-    gi.require_version('Gio', '2.0')
-    from gi.repository import Gio
-
-    Application = Gio.Application.new(name, Gio.ApplicationFlags.FLAGS_NONE)
-    Application.register()
-    Notification = Gio.Notification.new(title)
-    Notification.set_body(body)
-    Application.send_notification(None, Notification)
-
-
-if button == "1" :
-    send_notification(name , '' , body)
+    subprocess.run(["notify-send", " ", times])
