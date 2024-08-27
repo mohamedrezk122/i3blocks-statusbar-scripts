@@ -1,0 +1,9 @@
+#!/bin/bash
+
+layout=$(setxkbmap -query  | grep layout | awk '{print $2}' | cut -d "," -f 1 )
+
+if [[ "$layout" == *"ar"* ]]; then
+    setxkbmap -layout us,ara
+else
+    setxkbmap -layout ara,us
+fi
