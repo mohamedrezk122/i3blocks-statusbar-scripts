@@ -1,14 +1,20 @@
-#!/bin/python3
+#!/bin/bash
 
-import subprocess
+uptime=$(uptime -p)
 
-command = "uptime  | awk '{print $3 }' | cut -d \",\" -f  1"
-time_out = subprocess.getoutput(command)
+splitted=($uptime)
+if [[ "$uptime" == *"day"* ]];then
+    if [[ "$uptime" == *"hour"* ]];then
+        days=${splitted[1]}; hours=${splitted[3]}; mins=${splitted[5]}
+    else
+        days=${splitted[1]}; hours="0"; mins=${splitted[3]}
+    fi
+    echo "up: ${days}d ${hours}h ${mins}m"
 
-if ":" in time_out :
-	# mins and hours 
-	hours, mins = time_out.split(":")
-	print(f"up: {hours}h {mins}m")
-else:
-	# mins only
-	print(f"up: 0h {time_out}m")
+    elif [[ "$uptime" == *"hour"* ]];then
+    hours=${splitted[1]}; mins=${splitted[3]}
+    echo "up: ${hours}h ${mins}m"
+else
+    mins=${splitted[1]}
+    echo "up: 0h ${mins}m"
+fi
