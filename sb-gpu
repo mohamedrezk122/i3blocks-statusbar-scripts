@@ -1,12 +1,8 @@
-#!/bin/python3
-
-import subprocess 
-
-command = "nvidia-smi --format=csv --query-gpu=utilization.memory,temperature.gpu | awk \"NR==2\" "
-
-status = subprocess.getoutput(command)
-
-mem, temp = status.split(",")
-mem = mem.replace(" ", "")
-
-print(f"gpu: {mem}{temp}°C") 
+#!/bin/bash
+# output the gpu utilization, gpu memory and gpu temp
+query="utilization.gpu,utilization.memory,temperature.gpu"
+output=$(nvidia-smi --format=csv,noheader --query-gpu=$query)
+# convert to array by splitting on whitespace
+output=($output)
+gpu=${output[0]}; mem=${output[2]}; temp=${output[4]}
+echo "gpu: ${gpu}% ${mem}% ${temp}°C"
