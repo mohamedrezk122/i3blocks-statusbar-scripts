@@ -33,7 +33,7 @@ for prayer in prayers:
         next_prayer_name = prayer
         next_prayer_time = left
 
-if next_prayer_time is None:
+if next_prayer_time == float("inf"):
     next_prayer_time = (
         timedelta(
             hours=int(prayer_times.fajr.strftime("%H")),
