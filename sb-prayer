@@ -21,7 +21,7 @@ prayer_times = PrayerTimes(
 )
 
 prayers = {"fajr": None, "dhuhr": None, "asr": None, "maghrib": None, "isha": None}
-next_prayer_time, next_prayer_name = None, None
+next_prayer_time, next_prayer_name = float("inf"), None
 for prayer in prayers:
     time = eval(f"prayer_times.{prayer}")
     hours = int(time.strftime('%H'))
