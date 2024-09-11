@@ -9,6 +9,10 @@ playsound() {
     fi
 }
 
+update_blocks() {
+    pkill -RTMIN+2 i3blocks
+}
+
 format_volume() {
     local vol="$1"
     local is_muted=$(pactl get-sink-mute @DEFAULT_SINK@)
@@ -21,17 +25,20 @@ format_volume() {
 }
 
 case "$1" in
-    inc)
+    up)
         playsound
-        pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
-    dec)
+        pactl set-sink-volume @DEFAULT_SINK@ +5%
+        update_blocks ;;
+    down)
         playsound
-        pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
+        pactl set-sink-volume @DEFAULT_SINK@ -5%
+        update_blocks ;; 
     query)
         volume=$(pactl get-sink-volume @DEFAULT_SINK@)
         format_volume "$volume" ;;
-    mute)
-        pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+    toggle)
+        pactl set-sink-mute @DEFAULT_SINK@ toggle
+        update_blocks ;;
     *)
-        echo "Usage: ./sb-volume [inc|dec|mute|query]" ;;
+        echo "Usage: ./sb-volume [up|down|toggle|query]" ;;
 esac

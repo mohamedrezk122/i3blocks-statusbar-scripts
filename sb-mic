@@ -1,16 +1,20 @@
 #!/bin/bash
 
+update_blocks(){
+    pkill -RTMIN+2 i3blocks
+}
+
 case "$1" in
     toggle)
-        pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
+        pactl set-source-mute @DEFAULT_SOURCE@ toggle
+        update_blocks ;;
     mute)
-        pactl set-source-mute @DEFAULT_SOURCE@ 1 ;;
-    unmute)
-        pactl set-source-mute @DEFAULT_SOURCE@ 1 ;;
+        pactl set-source-mute @DEFAULT_SOURCE@ 1
+        update_blocks ;;
     query)
         is_muted=$(pactl get-source-mute @DEFAULT_SOURCE@)
         [[ "$is_muted" == *"yes"* ]] && status="muted" || status="on"
         echo "mic: $status" ;;
     *)
-        echo "Usage: ./sb-mic [toggle|mute|unmute|query]" ;;
+        echo "Usage: ./sb-mic [toggle|mute|query]" ;;
 esac

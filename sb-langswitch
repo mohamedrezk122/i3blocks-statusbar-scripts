@@ -7,3 +7,5 @@ if [[ "$layout" == *"ar"* ]]; then
 else
     setxkbmap -layout ara,us
 fi
+
+pkill -RTMIN+1 i3blocks
